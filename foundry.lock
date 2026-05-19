@@ -1,4 +1,10 @@
 {
+  "lib/chainlink-evm": {
+    "tag": {
+      "name": "contracts-v1.5.1-beta.0",
+      "rev": "49745b9a2ca28c1b3631ad1e643693bffc26dbe9"
+    }
+  },
   "lib/forge-std": {
     "tag": {
       "name": "v1.16.1",
