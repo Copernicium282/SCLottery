@@ -6,11 +6,22 @@ import {Raffle} from "../src/Raffle.sol";
 import {HelperConfig} from "./HelperConfig.s.sol";
 import {CreateSubscription, FundSubscription, AddConsumer} from "./Interactions.s.sol";
 
+/**
+ * @title DeployRaffle
+ * @notice A script to deploy the Raffle smart contract and handle VRF subscription setups on Sepolia and local chains.
+ */
 contract DeployRaffle is Script {
+    /**
+     * @notice Execution entrypoint when running the script directly.
+     */
     function run() public {
         deployContract();
     }
 
+    /**
+     * @notice Performs the complete deployment process, configuring VRF if necessary.
+     * @return The deployed Raffle contract instance and the HelperConfig configuration instance.
+     */
     function deployContract() public returns (Raffle, HelperConfig) {
         HelperConfig helperConfig = new HelperConfig();
 
@@ -27,7 +38,7 @@ contract DeployRaffle is Script {
 
             // Fund Subscription
             FundSubscription fundSubscription = new FundSubscription();
-            fundSubscription.fundSubscriptionUsingHelperConfig(activeNetworkConfig.vrfCoordinator, activeNetworkConfig.subscriptionId, activeNetworkConfig.link);
+            fundSubscription.fundSubscription(activeNetworkConfig.vrfCoordinator, activeNetworkConfig.subscriptionId, activeNetworkConfig.link);
         }
 
         vm.startBroadcast();

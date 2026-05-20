@@ -7,6 +7,10 @@ import {LinkToken} from "../test/mocks/LinkToken.sol";
 
 error HelperConfig__NoConfigForChainId(uint256 chainId);
 
+/**
+ * @title CodeConstants
+ * @notice Abstract contract defining key environment constants, chain IDs, and Mock VRF values.
+ */
 abstract contract CodeConstants {
     /* VRF Mock Values */
     uint96 public constant BASE_FEE = 0.1 ether;
@@ -18,6 +22,10 @@ abstract contract CodeConstants {
     uint256 public constant LOCALHOST_CHAIN_ID = 31337;
 }
 
+/**
+ * @title HelperConfig
+ * @notice Handles environment-specific deployment configurations (Sepolia, Anvil / Localhost).
+ */
 contract HelperConfig is Script, CodeConstants {
     struct NetworkConfig {
         uint256 entranceFee;
@@ -38,6 +46,9 @@ contract HelperConfig is Script, CodeConstants {
         activeNetworkConfig = networkConfigs[block.chainid];
     }
 
+    /**
+     * @notice Retrieves the active network configuration based on the current chain ID.
+     */
     function getActiveNetworkConfig() public returns (NetworkConfig memory) {
         if (networkConfigs[block.chainid].vrfCoordinator != address(0)) {
             return networkConfigs[block.chainid];
@@ -50,11 +61,18 @@ contract HelperConfig is Script, CodeConstants {
         }
     }
 
+    /**
+     * @notice Allows external scripts to set/persist a newly created VRF subscription ID in state.
+     * @param _subscriptionId The subscription ID to persist.
+     */
     function setSubscriptionId(uint256 _subscriptionId) public {
         networkConfigs[block.chainid].subscriptionId = _subscriptionId;
         activeNetworkConfig.subscriptionId = _subscriptionId;
     }
 
+    /**
+     * @notice Returns the hardcoded configurations for the Sepolia Ethereum testnet.
+     */
     function getSepoliaEthConfig() public pure returns (NetworkConfig memory) {
         return NetworkConfig({
             entranceFee: 0.01 ether,
@@ -67,6 +85,9 @@ contract HelperConfig is Script, CodeConstants {
         });
     }
 
+    /**
+     * @notice Returns or deploys a new local/mock network configuration on Anvil/Localhost.
+     */
     function getOrCreateAnvilConfig() public returns (NetworkConfig memory) {
         // If we already have a config, let's just return it
         if (networkConfigs[LOCALHOST_CHAIN_ID].vrfCoordinator != address(0)) {
