@@ -64,15 +64,50 @@ contract Raffle is VRFConsumerBaseV2Plus {
         if (msg.value < i_entranceFee) {
             revert Raffle__SendMoreToEnterRaffle();
         }
-        if(s_raffleState != RaffleState.OPEN){
+        if (s_raffleState != RaffleState.OPEN) {
             revert Raffle__RaffleNotOpen();
         }
         s_players.push(payable(msg.sender));
         emit PlayerEnteredRaffle(msg.sender);
     }
 
-    function pickWinner() external {
-        if (block.timestamp - s_lastTimestamp < i_interval) {
+    /**
+     * @dev Checking Chainlink Automation upkeep to check if the lottery is to be ended
+     * for upkeepNeeded to be true:
+     * 1. Time interval has passed between raffle runs
+     * 2. Lottery is open
+     * 3. Contract has ETH
+     * 4. Upkeep has LINK to remain active
+     * 5. Number of participants is more than 0
+     * @param - ignored
+     * @return upkeepNeeded - true if it's time to restart
+     * @return - ignored
+     */
+    function checkUpkeep(
+        bytes32 calldata /* checkData */
+    )
+        public
+        view
+        returns (
+            bool upkeepNeeded,
+            bytes32 memory /* performData */
+        )
+    {
+        bool intervalEnded = (block.timestamp - s_lastTimestamp >= i_interval);
+        bool isOpen = (s_raffleState == RaffleState.OPEN);
+        bool hasBalance = address(this).balance > 0;
+        bool hasPlayers = s_players.length > 0;
+        upkeepNeeded = intervalEnded && isOpen && hasBalance && hasPlayers;
+        return (upkeepNeeded, "");
+    }
+
+    function performUpkeep(
+        bytes32 memory /* performData */
+    )
+        external
+    {
+        (bool upkeepNeeded,) = checkUpkeep("");
+        if (!upkeepNeeded) {
             revert();
         }
         s_raffleState = RaffleState.CALCULATING;
@@ -91,18 +126,24 @@ contract Raffle is VRFConsumerBaseV2Plus {
         // This calls rawFulfillRandomWords, which checks if the request is from the vrfCoordinator, which then calls the fullfillRandomWords, which gets called through an interface to an existing contract that propagates the request to the DON to recieve a random number
     }
 
+    // CEI: Checks, Effects, Interactions
     function fulfillRandomWords(uint256 requestId, uint256[] calldata randomWords) internal override {
+        // Checks, like require();
+
+        // Effects (Internal Contract State)
         uint256 indexOfWinner = randomWords[0] % s_players.length; // As the returned randomWord is large
         address payable recentWinner = s_players[indexOfWinner];
         s_recentWinner = recentWinner;
         s_raffleState = RaffleState.OPEN;
         s_players = new address payable[](0); // Clear out previous players
         s_lastTimestamp = block.timestamp;
-        (bool success, ) = recentWinner.call{ value: address(this).balance}("");
-        if(!success){
+        emit WinnerPicked(s_recentWinner);
+
+        // Interactions
+        (bool success,) = recentWinner.call{value: address(this).balance}("");
+        if (!success) {
             revert Raffle__TransferFailed();
         }
-        emit WinnerPicked(s_recentWinner);
     }
 
     /* Getter func */
