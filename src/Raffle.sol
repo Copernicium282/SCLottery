@@ -85,13 +85,13 @@ contract Raffle is VRFConsumerBaseV2Plus {
      * @return - ignored
      */
     function checkUpkeep(
-        bytes32 calldata /* checkData */
+        bytes memory /* checkData */
     )
         public
         view
         returns (
             bool upkeepNeeded,
-            bytes32 memory /* performData */
+            bytes memory /* performData */
         )
     {
         bool intervalEnded = (block.timestamp - s_lastTimestamp >= i_interval);
@@ -103,7 +103,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
     }
 
     function performUpkeep(
-        bytes32 memory /* performData */
+        bytes memory /* performData */
     )
         external
     {
@@ -150,5 +150,9 @@ contract Raffle is VRFConsumerBaseV2Plus {
     /* Getter func */
     function getEntranceFee() external view returns (uint256) {
         return i_entranceFee;
+    }
+
+    function getRaffleState() external view returns (RaffleState) {
+        return s_raffleState;
     }
 }
