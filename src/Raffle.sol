@@ -8,6 +8,7 @@ import {VRFV2PlusClient} from "@chainlink/contracts/src/v0.8/vrf/dev/libraries/V
 error Raffle__SendMoreToEnterRaffle();
 error Raffle__TransferFailed();
 error Raffle__RaffleNotOpen();
+error Raffle__UpkeepNotNeeded(uint256 balance, uint256 numOfPlayers, uint256 state);
 
 /**
  * @title A sample Raffle contract
@@ -18,8 +19,8 @@ error Raffle__RaffleNotOpen();
 contract Raffle is VRFConsumerBaseV2Plus {
     /* Enums */
     enum RaffleState {
-        OPEN,
-        CALCULATING
+        OPEN, // 0
+        CALCULATING // 1
     }
 
     /* State Variables */
@@ -108,7 +109,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
     {
         (bool upkeepNeeded,) = checkUpkeep("");
         if (!upkeepNeeded) {
-            revert();
+            revert Raffle__UpkeepNotNeeded(address(this).balance, s_players.length, uint256(s_raffleState));
         }
         s_raffleState = RaffleState.CALCULATING;
         VRFV2PlusClient.RandomWordsRequest memory request = VRFV2PlusClient.RandomWordsRequest({ // Input the entire struct values
