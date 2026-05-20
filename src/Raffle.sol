@@ -123,12 +123,19 @@ contract Raffle is VRFConsumerBaseV2Plus {
                 VRFV2PlusClient.ExtraArgsV1({nativePayment: false})
             )
         });
-        uint256 requestId = s_vrfCoordinator.requestRandomWords(request);
+        s_vrfCoordinator.requestRandomWords(request);
         // This calls rawFulfillRandomWords, which checks if the request is from the vrfCoordinator, which then calls the fullfillRandomWords, which gets called through an interface to an existing contract that propagates the request to the DON to recieve a random number
     }
 
     // CEI: Checks, Effects, Interactions
-    function fulfillRandomWords(uint256 requestId, uint256[] calldata randomWords) internal override {
+    function fulfillRandomWords(
+        uint256,
+        /* requestId */
+        uint256[] calldata randomWords
+    )
+        internal
+        override
+    {
         // Checks, like require();
 
         // Effects (Internal Contract State)
@@ -154,5 +161,9 @@ contract Raffle is VRFConsumerBaseV2Plus {
 
     function getRaffleState() external view returns (RaffleState) {
         return s_raffleState;
+    }
+
+    function getPlayer(uint256 indexOfPlayer) external view returns (address) {
+        return s_players[indexOfPlayer];
     }
 }
