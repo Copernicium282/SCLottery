@@ -6,6 +6,7 @@ import {HelperConfig} from "./HelperConfig.s.sol";
 import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 import {CodeConstants} from "./HelperConfig.s.sol";
 import {LinkToken} from "../test/mocks/LinkToken.sol";
+import {DevOpsTools} from "foundry-devops/src/DevOpsTools.sol";
 
 contract CreateSubscription is Script, CodeConstants {
     function createSub(
@@ -46,10 +47,14 @@ contract CreateSubscription is Script, CodeConstants {
     }
 }
 
-contract fundSubscription is Script {
+contract FundSubscription is Script {
     uint256 constant FUND_AMOUNT = 6 ether; // 6 LINK
 
-    function fundSubscriptionUsingHelperConfig() public {
+    function fundSubscriptionUsingHelperConfig(
+        address vrfCoordinator,
+        uint256 subId,
+        address link
+    ) public {
         HelperConfig helperConfig = new HelperConfig();
         HelperConfig.NetworkConfig memory activeNetworkConfig = helperConfig
             .getActiveNetworkConfig();
@@ -65,7 +70,7 @@ contract fundSubscription is Script {
         console.log("On Chain ID:", block.chainid);
         console.log("Funding amount (in LINK):", FUND_AMOUNT / 1e18);
 
-        if (block.chainid != helperConfig.LOCALHOST_CHAIN_ID()) {
+        if (block.chainid == helperConfig.LOCALHOST_CHAIN_ID()) {
             vm.startBroadcast();
             VRFCoordinatorV2_5Mock(activeNetworkConfig.vrfCoordinator)
                 .fundSubscription(
@@ -88,5 +93,54 @@ contract fundSubscription is Script {
 
     function run() public {
         fundSubscriptionUsingHelperConfig();
+    }
+}
+
+contract AddConsumer is Script {
+    function addConsumerUsingHelperConfig(address raffleAddress) public {
+        HelperConfig helperConfig = new HelperConfig();
+        HelperConfig.NetworkConfig memory activeNetworkConfig = helperConfig
+            .getActiveNetworkConfig();
+
+        uint256 subId = activeNetworkConfig.subscriptionId;
+        address vrfCoordinator = activeNetworkConfig.vrfCoordinator;
+    }
+
+    function addConsumer(
+        address raffleAddress,
+        address vrfCoordinator,
+        uint256 subId
+    ) public {
+        console.log(
+            "Adding consumer with address:",
+            raffleAddress,
+            "to subscription with ID:",
+            subId
+        );
+        console.log("Using VRF Coordinator at:", vrfCoordinator);
+        console.log("On Chain ID:", block.chainid);
+
+        vm.startBroadcast();
+        VRFCoordinatorV2_5Mock(vrfCoordinator).addConsumer(
+            subId,
+            raffleAddress
+        );
+        vm.stopBroadcast();
+        console.log(
+            "Consumer with address:",
+            raffleAddress,
+            "added to subscription with ID:",
+            subId
+        );
+        addConsumerUsingHelperConfig(raffleAddress);
+    }
+
+    function run() public {
+        // Replace this with the address of your deployed Raffle contract
+        address raffleAddress = DevOpsTools.get_most_recent_deployment(
+            "Raffle",
+            block.chainid
+        );
+        addConsumerUsingHelperConfig(raffleAddress);
     }
 }
