@@ -9,36 +9,22 @@ import {LinkToken} from "../test/mocks/LinkToken.sol";
 import {DevOpsTools} from "foundry-devops/src/DevOpsTools.sol";
 
 contract CreateSubscription is Script, CodeConstants {
-    function createSub(
-        address vrfCoordinator
-    ) public returns (uint256 subId, address coordinator) {
-        console.log(
-            "Creating subscription with VRF Coordinator at:",
-            vrfCoordinator
-        );
+    function createSub(address vrfCoordinator) public returns (uint256 subId, address coordinator) {
+        console.log("Creating subscription with VRF Coordinator at:", vrfCoordinator);
 
         vm.startBroadcast();
-        uint256 subscriptionId = VRFCoordinatorV2_5Mock(vrfCoordinator)
-            .createSubscription();
+        uint256 subscriptionId = VRFCoordinatorV2_5Mock(vrfCoordinator).createSubscription();
         vm.stopBroadcast();
 
         console.log("Subscription created with ID:", subscriptionId);
-        console.log(
-            "Please update the subscription ID in the HelperConfig.s.sol file to:",
-            subscriptionId
-        );
+        console.log("Please update the subscription ID in the HelperConfig.s.sol file to:", subscriptionId);
         return (subscriptionId, vrfCoordinator);
     }
 
-    function createSubscriptionFromActiveNetworkConfig()
-        public
-        returns (uint256 subId, address coordinator)
-    {
+    function createSubscriptionFromActiveNetworkConfig() public returns (uint256 subId, address coordinator) {
         HelperConfig helperConfig = new HelperConfig();
-        address vrfCoordinator = helperConfig
-            .getActiveNetworkConfig()
-            .vrfCoordinator;
-        (uint256 subscriptionId, ) = createSub(vrfCoordinator);
+        address vrfCoordinator = helperConfig.getActiveNetworkConfig().vrfCoordinator;
+        (uint256 subscriptionId,) = createSub(vrfCoordinator);
         return (subscriptionId, vrfCoordinator);
     }
 
@@ -59,12 +45,9 @@ contract FundSubscription is Script {
      */
     function fundSubscriptionUsingHelperConfig() public {
         HelperConfig helperConfig = new HelperConfig();
-        HelperConfig.NetworkConfig memory activeNetworkConfig = helperConfig
-            .getActiveNetworkConfig();
+        HelperConfig.NetworkConfig memory activeNetworkConfig = helperConfig.getActiveNetworkConfig();
         fundSubscription(
-            activeNetworkConfig.vrfCoordinator,
-            activeNetworkConfig.subscriptionId,
-            activeNetworkConfig.link
+            activeNetworkConfig.vrfCoordinator, activeNetworkConfig.subscriptionId, activeNetworkConfig.link
         );
     }
 
@@ -74,11 +57,7 @@ contract FundSubscription is Script {
      * @param subId The ID of the subscription to fund.
      * @param link The address of the Link Token contract.
      */
-    function fundSubscription(
-        address vrfCoordinator,
-        uint256 subId,
-        address link
-    ) public {
+    function fundSubscription(address vrfCoordinator, uint256 subId, address link) public {
         console.log("Funding subscription with ID:", subId);
         console.log("Using VRF Coordinator at:", vrfCoordinator);
         console.log("On Chain ID:", block.chainid);
@@ -87,18 +66,11 @@ contract FundSubscription is Script {
         HelperConfig helperConfig = new HelperConfig();
         if (block.chainid == helperConfig.LOCALHOST_CHAIN_ID()) {
             vm.startBroadcast();
-            VRFCoordinatorV2_5Mock(vrfCoordinator).fundSubscription(
-                subId,
-                FUND_AMOUNT
-            );
+            VRFCoordinatorV2_5Mock(vrfCoordinator).fundSubscription(subId, FUND_AMOUNT);
             vm.stopBroadcast();
         } else {
             vm.startBroadcast();
-            LinkToken(link).transferAndCall(
-                vrfCoordinator,
-                FUND_AMOUNT,
-                abi.encode(subId)
-            );
+            LinkToken(link).transferAndCall(vrfCoordinator, FUND_AMOUNT, abi.encode(subId));
             vm.stopBroadcast();
         }
         console.log("Subscription funded with amount:", FUND_AMOUNT);
@@ -123,8 +95,7 @@ contract AddConsumer is Script {
      */
     function addConsumerUsingHelperConfig(address raffleAddress) public {
         HelperConfig helperConfig = new HelperConfig();
-        HelperConfig.NetworkConfig memory activeNetworkConfig = helperConfig
-            .getActiveNetworkConfig();
+        HelperConfig.NetworkConfig memory activeNetworkConfig = helperConfig.getActiveNetworkConfig();
 
         uint256 subId = activeNetworkConfig.subscriptionId;
         address vrfCoordinator = activeNetworkConfig.vrfCoordinator;
@@ -137,32 +108,15 @@ contract AddConsumer is Script {
      * @param vrfCoordinator The address of the VRF Coordinator contract.
      * @param subId The ID of the subscription.
      */
-    function addConsumer(
-        address raffleAddress,
-        address vrfCoordinator,
-        uint256 subId
-    ) public {
-        console.log(
-            "Adding consumer with address:",
-            raffleAddress,
-            "to subscription with ID:",
-            subId
-        );
+    function addConsumer(address raffleAddress, address vrfCoordinator, uint256 subId) public {
+        console.log("Adding consumer with address:", raffleAddress, "to subscription with ID:", subId);
         console.log("Using VRF Coordinator at:", vrfCoordinator);
         console.log("On Chain ID:", block.chainid);
 
         vm.startBroadcast();
-        VRFCoordinatorV2_5Mock(vrfCoordinator).addConsumer(
-            subId,
-            raffleAddress
-        );
+        VRFCoordinatorV2_5Mock(vrfCoordinator).addConsumer(subId, raffleAddress);
         vm.stopBroadcast();
-        console.log(
-            "Consumer with address:",
-            raffleAddress,
-            "added to subscription with ID:",
-            subId
-        );
+        console.log("Consumer with address:", raffleAddress, "added to subscription with ID:", subId);
     }
 
     /**
@@ -170,10 +124,7 @@ contract AddConsumer is Script {
      */
     function run() public {
         // Replace this with the address of your deployed Raffle contract
-        address raffleAddress = DevOpsTools.get_most_recent_deployment(
-            "Raffle",
-            block.chainid
-        );
+        address raffleAddress = DevOpsTools.get_most_recent_deployment("Raffle", block.chainid);
         addConsumerUsingHelperConfig(raffleAddress);
     }
 }

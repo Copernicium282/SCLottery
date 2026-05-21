@@ -39,6 +39,7 @@ contract Raffle is VRFConsumerBaseV2Plus {
     /* Events */
     event PlayerEnteredRaffle(address indexed player); // Make frontend indexing easier
     event WinnerPicked(address indexed winner);
+    event RequestedRaffleWinner(uint256 indexed requestId);
 
     constructor(
         uint256 entranceFee,
@@ -46,10 +47,8 @@ contract Raffle is VRFConsumerBaseV2Plus {
         address vrfCoordinator,
         bytes32 gasLane,
         uint256 subID,
-        uint32 gasLimit
-    ) // VRFConsumerBaseV2Plus has a constructor, so we need to init that first
-        VRFConsumerBaseV2Plus(vrfCoordinator)
-    {
+        uint32 gasLimit // VRFConsumerBaseV2Plus has a constructor, so we need to init that first
+    ) VRFConsumerBaseV2Plus(vrfCoordinator) {
         i_entranceFee = entranceFee;
         i_interval = interval;
         s_lastTimestamp = block.timestamp;
@@ -123,7 +122,8 @@ contract Raffle is VRFConsumerBaseV2Plus {
                 VRFV2PlusClient.ExtraArgsV1({nativePayment: false})
             )
         });
-        s_vrfCoordinator.requestRandomWords(request);
+        uint256 requestId = s_vrfCoordinator.requestRandomWords(request);
+        emit RequestedRaffleWinner(requestId);
         // This calls rawFulfillRandomWords, which checks if the request is from the vrfCoordinator, which then calls the fullfillRandomWords, which gets called through an interface to an existing contract that propagates the request to the DON to recieve a random number
     }
 
@@ -165,5 +165,13 @@ contract Raffle is VRFConsumerBaseV2Plus {
 
     function getPlayer(uint256 indexOfPlayer) external view returns (address) {
         return s_players[indexOfPlayer];
+    }
+
+    function getRecentWinner() external view returns (address) {
+        return s_recentWinner;
+    }
+
+    function getLastTimeStamp() external view returns (uint256) {
+        return s_lastTimestamp;
     }
 }

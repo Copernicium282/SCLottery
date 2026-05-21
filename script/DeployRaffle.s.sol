@@ -38,7 +38,9 @@ contract DeployRaffle is Script {
 
             // Fund Subscription
             FundSubscription fundSubscription = new FundSubscription();
-            fundSubscription.fundSubscription(activeNetworkConfig.vrfCoordinator, activeNetworkConfig.subscriptionId, activeNetworkConfig.link);
+            fundSubscription.fundSubscription(
+                activeNetworkConfig.vrfCoordinator, activeNetworkConfig.subscriptionId, activeNetworkConfig.link
+            );
         }
 
         vm.startBroadcast();
