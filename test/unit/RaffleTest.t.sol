@@ -5,11 +5,11 @@ import {Test, console} from "forge-std/Test.sol";
 import {StdAssertions} from "forge-std/StdAssertions.sol";
 import "../../src/Raffle.sol";
 import {DeployRaffle} from "../../script/DeployRaffle.s.sol";
-import {HelperConfig} from "../../script/HelperConfig.s.sol";
+import {HelperConfig, CodeConstants} from "../../script/HelperConfig.s.sol";
 import {Vm} from "forge-std/Vm.sol";
 import {VRFCoordinatorV2_5Mock} from "@chainlink/contracts/src/v0.8/vrf/mocks/VRFCoordinatorV2_5Mock.sol";
 
-contract RaffleTest is Test {
+contract RaffleTest is Test, CodeConstants {
     Raffle public raffle;
     HelperConfig public helperConfig;
 
@@ -160,7 +160,14 @@ contract RaffleTest is Test {
         assert(requestId > 0);
     }
 
-    function testfulfillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(uint256 randomRequestId) public raffleEntered {
+    modifier skipFork() {
+        if (block.chainid == SEPOLIA_CHAIN_ID) {
+            return;
+        }
+        _;
+    }
+
+    function testfulfillRandomWordsCanOnlyBeCalledAfterPerformUpkeep(uint256 randomRequestId) public raffleEntered skipFork {
         // Arrange & Act & Assert
         vm.expectRevert(VRFCoordinatorV2_5Mock.InvalidRequest.selector);
         VRFCoordinatorV2_5Mock(vrfCoordinator).fulfillRandomWords(randomRequestId, address(raffle));
@@ -169,7 +176,7 @@ contract RaffleTest is Test {
     /**
      * @notice Verifies that fulfilling random words successfully selects a winner, resets state, and distributes funds.
      */
-    function testfulfillRandomWordsPicksAWinnerResetsTheRaffleAndSendsMoney() public raffleEntered {
+    function testfulfillRandomWordsPicksAWinnerResetsTheRaffleAndSendsMoney() public raffleEntered skipFork {
         // Arrange
         uint256 additionalEntrants = 5;
         uint256 startingIndex = 1; // We already have 1 entrant from the raffleEntered modifier

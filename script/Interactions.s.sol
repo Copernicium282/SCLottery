@@ -16,9 +16,22 @@ contract CreateSubscription is Script, CodeConstants {
      * @return coordinator The address of the VRF coordinator.
      */
     function createSub(address vrfCoordinator) public returns (uint256 subId, address coordinator) {
+        HelperConfig helperConfig = new HelperConfig();
+        address account = helperConfig.getActiveNetworkConfig().account;
+        return createSub(vrfCoordinator, account);
+    }
+
+    /**
+     * @notice Creates a new Chainlink VRF subscription with a specific broadcasting account.
+     * @param vrfCoordinator The address of the VRF coordinator.
+     * @param account The account address to use for broadcasting.
+     * @return subId The created subscription ID.
+     * @return coordinator The address of the VRF coordinator.
+     */
+    function createSub(address vrfCoordinator, address account) public returns (uint256 subId, address coordinator) {
         console.log("Creating subscription with VRF Coordinator at:", vrfCoordinator);
 
-        vm.startBroadcast();
+        vm.startBroadcast(account);
         uint256 subscriptionId = VRFCoordinatorV2_5Mock(vrfCoordinator).createSubscription();
         vm.stopBroadcast();
 
@@ -35,7 +48,8 @@ contract CreateSubscription is Script, CodeConstants {
     function createSubscriptionFromActiveNetworkConfig() public returns (uint256 subId, address coordinator) {
         HelperConfig helperConfig = new HelperConfig();
         address vrfCoordinator = helperConfig.getActiveNetworkConfig().vrfCoordinator;
-        (uint256 subscriptionId,) = createSub(vrfCoordinator);
+        address account = helperConfig.getActiveNetworkConfig().account;
+        (uint256 subscriptionId,) = createSub(vrfCoordinator, account);
         return (subscriptionId, vrfCoordinator);
     }
 
@@ -58,7 +72,10 @@ contract FundSubscription is Script {
         HelperConfig helperConfig = new HelperConfig();
         HelperConfig.NetworkConfig memory activeNetworkConfig = helperConfig.getActiveNetworkConfig();
         fundSubscription(
-            activeNetworkConfig.vrfCoordinator, activeNetworkConfig.subscriptionId, activeNetworkConfig.link
+            activeNetworkConfig.vrfCoordinator,
+            activeNetworkConfig.subscriptionId,
+            activeNetworkConfig.link,
+            activeNetworkConfig.account
         );
     }
 
@@ -69,6 +86,19 @@ contract FundSubscription is Script {
      * @param link The address of the Link Token contract.
      */
     function fundSubscription(address vrfCoordinator, uint256 subId, address link) public {
+        HelperConfig helperConfig = new HelperConfig();
+        address account = helperConfig.getActiveNetworkConfig().account;
+        fundSubscription(vrfCoordinator, subId, link, account);
+    }
+
+    /**
+     * @notice Funds a VRF subscription directly with a specific VRF Coordinator, Link Token, and broadcasting account.
+     * @param vrfCoordinator The address of the Chainlink VRF Coordinator contract.
+     * @param subId The ID of the subscription to fund.
+     * @param link The address of the Link Token contract.
+     * @param account The address of the broadcasting account.
+     */
+    function fundSubscription(address vrfCoordinator, uint256 subId, address link, address account) public {
         console.log("Funding subscription with ID:", subId);
         console.log("Using VRF Coordinator at:", vrfCoordinator);
         console.log("On Chain ID:", block.chainid);
@@ -76,11 +106,11 @@ contract FundSubscription is Script {
 
         HelperConfig helperConfig = new HelperConfig();
         if (block.chainid == helperConfig.LOCALHOST_CHAIN_ID()) {
-            vm.startBroadcast();
+            vm.startBroadcast(account);
             VRFCoordinatorV2_5Mock(vrfCoordinator).fundSubscription(subId, FUND_AMOUNT);
             vm.stopBroadcast();
         } else {
-            vm.startBroadcast();
+            vm.startBroadcast(account);
             LinkToken(link).transferAndCall(vrfCoordinator, FUND_AMOUNT, abi.encode(subId));
             vm.stopBroadcast();
         }
@@ -110,7 +140,7 @@ contract AddConsumer is Script {
 
         uint256 subId = activeNetworkConfig.subscriptionId;
         address vrfCoordinator = activeNetworkConfig.vrfCoordinator;
-        addConsumer(raffleAddress, vrfCoordinator, subId);
+        addConsumer(raffleAddress, vrfCoordinator, subId, activeNetworkConfig.account);
     }
 
     /**
@@ -120,11 +150,24 @@ contract AddConsumer is Script {
      * @param subId The ID of the subscription.
      */
     function addConsumer(address raffleAddress, address vrfCoordinator, uint256 subId) public {
+        HelperConfig helperConfig = new HelperConfig();
+        address account = helperConfig.getActiveNetworkConfig().account;
+        addConsumer(raffleAddress, vrfCoordinator, subId, account);
+    }
+
+    /**
+     * @notice Registers a consumer on a subscription directly with a specific VRF Coordinator and broadcasting account.
+     * @param raffleAddress The address of the consumer contract to register.
+     * @param vrfCoordinator The address of the VRF Coordinator contract.
+     * @param subId The ID of the subscription.
+     * @param account The address of the broadcasting account.
+     */
+    function addConsumer(address raffleAddress, address vrfCoordinator, uint256 subId, address account) public {
         console.log("Adding consumer with address:", raffleAddress, "to subscription with ID:", subId);
         console.log("Using VRF Coordinator at:", vrfCoordinator);
         console.log("On Chain ID:", block.chainid);
 
-        vm.startBroadcast();
+        vm.startBroadcast(account);
         VRFCoordinatorV2_5Mock(vrfCoordinator).addConsumer(subId, raffleAddress);
         vm.stopBroadcast();
         console.log("Consumer with address:", raffleAddress, "added to subscription with ID:", subId);

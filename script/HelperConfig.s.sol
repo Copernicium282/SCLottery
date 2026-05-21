@@ -35,6 +35,7 @@ contract HelperConfig is Script, CodeConstants {
         uint256 subscriptionId;
         uint32 callbackGasLimit;
         address link;
+        address account;
     }
 
     NetworkConfig public activeNetworkConfig;
@@ -91,7 +92,8 @@ contract HelperConfig is Script, CodeConstants {
             gasLane: 0x787d74caea10b2b357790d5b5247c2f63d1d91572a9846f780606e4d953677ae,
             subscriptionId: 93590248486924931070816542843925010346016264624122707241679032080805822934383,
             callbackGasLimit: 500000,
-            link: 0x779877A7B0D9E8603169DdbD7836e478b4624789
+            link: 0x779877A7B0D9E8603169DdbD7836e478b4624789,
+            account: 0x7F99f10684e4F70051f3de5Ceb9fDC71a38aF0Fd
         });
     }
 
@@ -119,7 +121,8 @@ contract HelperConfig is Script, CodeConstants {
             gasLane: bytes32(uint256(1)),
             subscriptionId: 0,
             callbackGasLimit: 500000,
-            link: address(linkTokenMock)
+            link: address(linkTokenMock),
+            account: 0x1804c8AB1F12E6bbf3894d4083f33e07309d1f38
         });
     }
 }

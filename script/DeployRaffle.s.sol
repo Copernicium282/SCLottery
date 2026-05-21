@@ -44,7 +44,7 @@ contract DeployRaffle is Script {
             );
         }
 
-        vm.startBroadcast();
+        vm.startBroadcast(activeNetworkConfig.account);
         Raffle raffle = new Raffle(
             activeNetworkConfig.entranceFee,
             activeNetworkConfig.interval,
