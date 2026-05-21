@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: SEE LICENSE IN LICENSE
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
 import {Script} from "forge-std/Script.sol";
@@ -79,7 +79,6 @@ contract HelperConfig is Script, CodeConstants {
         networkConfigs[block.chainid].vrfCoordinator = _vrfCoordinator;
         activeNetworkConfig.vrfCoordinator = _vrfCoordinator;
     }
-
 
     /**
      * @notice Returns the hardcoded configurations for the Sepolia Ethereum testnet.
