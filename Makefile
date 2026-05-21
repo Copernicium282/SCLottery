@@ -5,6 +5,7 @@ ETHERSCAN_API_KEY := $(shell [ -f .env ] && grep ETHERSCAN_API_KEY .env | cut -d
 .PHONY: all clean remove install update build test test-unit test-integration coverage snapshot format anvil deploy help
 
 DEFAULT_ANVIL_KEY := 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+ACCOUNT := sepoliaKey
 
 help:
 	@echo "Usage:"

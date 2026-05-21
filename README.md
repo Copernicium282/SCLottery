@@ -24,7 +24,7 @@ The project is structured to deploy on local and testnet networks dynamically us
 
 | Chain ID   | Network                 | Description                                                                                                                                                                   |
 | :--------- | :---------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **11155111**| Sepolia Testnet         | Test network mimicking production oracle behaviors with official Chainlink Sepolia VRF Coordinator and Link Token addresses.                                                  |
+| **11155111**| Sepolia Testnet         | Deployed Raffle Contract at [`0x39125d25B352F064B943Ea9DA9C229bA0D3a69c1`](https://sepolia.etherscan.io/address/0x39125d25b352f064b943ea9da9c229ba0d3a69c1). Test network mimicking production oracle behaviors with official Chainlink Sepolia VRF Coordinator. |
 | **Local**  | Local Anvil Chain       | Local development network. The deploy scripts dynamically spawn a VRFCoordinatorV2_5Mock and create/fund subscriptions locally without external RPC calls.                   |
 
 ### Codebase Breakdown
@@ -119,6 +119,12 @@ Deploy the contract to Sepolia, dynamically loading environment variables and ve
 ```bash
 make deploy-sepolia
 ```
+
+The contract has been successfully deployed and verified on the Sepolia testnet:
+* **Raffle Contract Address**: [`0x39125d25B352F064B943Ea9DA9C229bA0D3a69c1`](https://sepolia.etherscan.io/address/0x39125d25b352f064b943ea9da9c229ba0d3a69c1)
+* **VRF Coordinator V2.5**: `0x9DdfaCa8183c41ad55329BdeeD9F6A8d53168B1B`
+* **VRF Subscription ID**: `93590248486924931070816542843925010346016264624122707241679032080805822934383`
+
 
 ## Testing Structure
 
