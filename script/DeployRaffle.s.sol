@@ -35,6 +35,7 @@ contract DeployRaffle is Script {
             (activeNetworkConfig.subscriptionId, activeNetworkConfig.vrfCoordinator) =
                 createSubscription.createSubscriptionFromActiveNetworkConfig();
             helperConfig.setSubscriptionId(activeNetworkConfig.subscriptionId);
+            helperConfig.setVrfCoordinator(activeNetworkConfig.vrfCoordinator);
 
             // Fund Subscription
             FundSubscription fundSubscription = new FundSubscription();

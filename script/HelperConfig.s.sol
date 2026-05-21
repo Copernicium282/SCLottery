@@ -71,6 +71,16 @@ contract HelperConfig is Script, CodeConstants {
     }
 
     /**
+     * @notice Allows external scripts to set/persist the deployed VRF coordinator address in state.
+     * @param _vrfCoordinator The address of the deployed VRF coordinator.
+     */
+    function setVrfCoordinator(address _vrfCoordinator) public {
+        networkConfigs[block.chainid].vrfCoordinator = _vrfCoordinator;
+        activeNetworkConfig.vrfCoordinator = _vrfCoordinator;
+    }
+
+
+    /**
      * @notice Returns the hardcoded configurations for the Sepolia Ethereum testnet.
      */
     function getSepoliaEthConfig() public pure returns (NetworkConfig memory) {

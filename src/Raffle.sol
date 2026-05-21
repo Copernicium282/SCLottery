@@ -58,6 +58,9 @@ contract Raffle is VRFConsumerBaseV2Plus {
         s_raffleState = RaffleState.OPEN;
     }
 
+    /**
+     * @notice Allows users to enter the raffle by paying the entrance fee.
+     */
     function enterRaffle() external payable {
         // require(msg.value >= i_entranceFee, "Not enough ETH sent");
         // require(msg.value >= i_entranceFee, SendMoreToEnterRaffle()); as of Solidity 0.8.24
@@ -101,6 +104,9 @@ contract Raffle is VRFConsumerBaseV2Plus {
         return (upkeepNeeded, "");
     }
 
+    /**
+     * @notice Triggers the selection of a random raffle winner when upkeep is needed.
+     */
     function performUpkeep(
         bytes memory /* performData */
     )

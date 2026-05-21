@@ -9,6 +9,12 @@ import {LinkToken} from "../test/mocks/LinkToken.sol";
 import {DevOpsTools} from "foundry-devops/src/DevOpsTools.sol";
 
 contract CreateSubscription is Script, CodeConstants {
+    /**
+     * @notice Creates a new Chainlink VRF subscription.
+     * @param vrfCoordinator The address of the VRF coordinator.
+     * @return subId The created subscription ID.
+     * @return coordinator The address of the VRF coordinator.
+     */
     function createSub(address vrfCoordinator) public returns (uint256 subId, address coordinator) {
         console.log("Creating subscription with VRF Coordinator at:", vrfCoordinator);
 
@@ -21,6 +27,11 @@ contract CreateSubscription is Script, CodeConstants {
         return (subscriptionId, vrfCoordinator);
     }
 
+    /**
+     * @notice Creates a VRF subscription using parameters from the HelperConfig.
+     * @return subId The created subscription ID.
+     * @return coordinator The address of the VRF coordinator.
+     */
     function createSubscriptionFromActiveNetworkConfig() public returns (uint256 subId, address coordinator) {
         HelperConfig helperConfig = new HelperConfig();
         address vrfCoordinator = helperConfig.getActiveNetworkConfig().vrfCoordinator;
