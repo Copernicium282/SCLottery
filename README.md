@@ -1,4 +1,4 @@
-# SCLottery
+# Raffle (A Chainlink-VRF and Automation based Lottery Project)
 
 [![Foundry Version](https://img.shields.io/badge/foundry-v0.2.0-blue.svg)](https://book.getfoundry.sh/)
 [![Solidity Version](https://img.shields.io/badge/solidity-^0.8.19-lightgrey.svg)](https://soliditylang.org/)
